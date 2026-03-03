@@ -13,5 +13,7 @@ export type CodeChunk = {
   elementName: string;
   elementType: string;
   charCount: number;
+  charStart: number;
+  charEnd: number;
   content: string;
 };
