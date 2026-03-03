@@ -72,10 +72,35 @@ export async function buildDocuments(
   return documents;
 }
 
+/**
+ * Creates a CodeChunk with exactly calculated metadata.
+ */
+function createCodeChunk(
+  fileName: string,
+  elementName: string,
+  elementType: string,
+  content: string,
+  charStart: number,
+): CodeChunk {
+  return {
+    fileName,
+    elementName,
+    elementType,
+    content,
+    charStart,
+    charEnd: charStart + content.length,
+    charCount: content.length,
+  };
+}
+
 export async function extractChunksFromFile(
   filePath: string,
   maxChunkSize: number = 2000,
 ): Promise<CodeChunk[]> {
+  if (maxChunkSize <= 0) {
+    throw new Error('maxChunkSize must be greater than 0');
+  }
+
   const sourceCode = await readFile(filePath, 'utf-8');
 
   const sourceFile = ts.createSourceFile(
@@ -86,37 +111,31 @@ export async function extractChunksFromFile(
   );
 
   const chunks: CodeChunk[] = [];
+  const fileName = basename(filePath);
 
   function pushChunk(name: string, type: string, node: ts.Node) {
     const fullContent = node.getText(sourceFile);
     const nodeStart = node.getStart(sourceFile);
-    const fileName = basename(filePath);
 
     if (fullContent.length <= maxChunkSize) {
-      chunks.push({
-        fileName,
-        elementName: name,
-        elementType: type,
-        charCount: fullContent.length,
-        charStart: nodeStart,
-        charEnd: nodeStart + fullContent.length,
-        content: fullContent,
-      });
+      chunks.push(
+        createCodeChunk(fileName, name, type, fullContent, nodeStart),
+      );
     } else {
       for (let i = 0; i < fullContent.length; i += maxChunkSize) {
         const chunkContent = fullContent.substring(i, i + maxChunkSize);
         const chunkStart = nodeStart + i;
-        const chunkEnd = chunkStart + chunkContent.length;
+        const partNumber = Math.floor(i / maxChunkSize) + 1;
 
-        chunks.push({
-          fileName,
-          elementName: `${name} (part ${Math.floor(i / maxChunkSize) + 1})`,
-          elementType: type,
-          charCount: chunkContent.length,
-          charStart: chunkStart,
-          charEnd: chunkEnd,
-          content: chunkContent,
-        });
+        chunks.push(
+          createCodeChunk(
+            fileName,
+            `${name} (part ${partNumber})`,
+            type,
+            chunkContent,
+            chunkStart,
+          ),
+        );
       }
     }
   }
