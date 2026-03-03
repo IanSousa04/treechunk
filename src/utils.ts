@@ -1,8 +1,7 @@
 import { readdir, readFile, stat } from 'fs/promises';
-import { join, extname, relative } from 'path';
+import { join, extname, relative, basename } from 'path';
 import crypto from 'crypto';
 import ts from 'typescript';
-import { basename } from 'path';
 import { CodeChunk, FileDocument } from './types';
 
 export async function readDirRecursiveFiltered(
@@ -75,6 +74,7 @@ export async function buildDocuments(
 
 export async function extractChunksFromFile(
   filePath: string,
+  maxChunkSize: number = 2000,
 ): Promise<CodeChunk[]> {
   const sourceCode = await readFile(filePath, 'utf-8');
 
@@ -88,21 +88,40 @@ export async function extractChunksFromFile(
   const chunks: CodeChunk[] = [];
 
   function pushChunk(name: string, type: string, node: ts.Node) {
-    const content = node.getText(sourceFile);
+    const fullContent = node.getText(sourceFile);
+    const nodeStart = node.getStart(sourceFile);
+    const fileName = basename(filePath);
 
-    chunks.push({
-      fileName: basename(filePath),
-      elementName: name,
-      elementType: type,
-      charCount: content.length,
-      content,
-    });
+    if (fullContent.length <= maxChunkSize) {
+      chunks.push({
+        fileName,
+        elementName: name,
+        elementType: type,
+        charCount: fullContent.length,
+        charStart: nodeStart,
+        charEnd: nodeStart + fullContent.length,
+        content: fullContent,
+      });
+    } else {
+      for (let i = 0; i < fullContent.length; i += maxChunkSize) {
+        const chunkContent = fullContent.substring(i, i + maxChunkSize);
+        const chunkStart = nodeStart + i;
+        const chunkEnd = chunkStart + chunkContent.length;
+
+        chunks.push({
+          fileName,
+          elementName: `${name} (part ${Math.floor(i / maxChunkSize) + 1})`,
+          elementType: type,
+          charCount: chunkContent.length,
+          charStart: chunkStart,
+          charEnd: chunkEnd,
+          content: chunkContent,
+        });
+      }
+    }
   }
 
   for (const statement of sourceFile.statements) {
-    // =========================
-    // Named Declarations
-    // =========================
     if (
       (ts.isFunctionDeclaration(statement) ||
         ts.isClassDeclaration(statement) ||
@@ -120,9 +139,6 @@ export async function extractChunksFromFile(
       }
     }
 
-    // =========================
-    // Variable Statements
-    // =========================
     if (ts.isVariableStatement(statement)) {
       for (const decl of statement.declarationList.declarations) {
         if (ts.isIdentifier(decl.name)) {
@@ -131,16 +147,10 @@ export async function extractChunksFromFile(
       }
     }
 
-    // =========================
-    // Export Default (anonymous)
-    // =========================
     if (ts.isExportAssignment(statement)) {
       pushChunk('default_export', 'export', statement);
     }
 
-    // =========================
-    // Classes → pegar membros também
-    // =========================
     if (ts.isClassDeclaration(statement) && statement.name) {
       for (const member of statement.members) {
         if ('name' in member && member.name && ts.isIdentifier(member.name)) {
