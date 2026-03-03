@@ -1,37 +1,34 @@
-# Fila Impressão
+# TreeChunk
 
 Uma biblioteca TypeScript estruturada para análise de código e extração de chunks (pedaços) de arquivos fonte. Esta ferramenta utiliza o compilador TypeScript para navegar na Árvore de Sintaxe Abstrata (AST) e identificar funções, classes, interfaces e outros elementos.
 
 ## Funcionalidades
 
-- Varredura recursiva de diretórios com filtros de extensão.
-- Extração de metadados de arquivos (tamanho, hash MD5, data de modificação).
-- Identificação de elementos de código via AST (TypeScript).
-- Divisão automática de elementos grandes em chunks de tamanho configurável (padrão 2000 caracteres).
-- Suporte a ESM e CommonJS.
+- **Simplificado**: Gere chunks com apenas uma chamada de função.
+- **AST-based**: Utiliza o parser do TypeScript para identificação precisa de elementos de código.
+- **Auto-splitting**: Divide elementos grandes em múltiplos chunks respeitando limites de caracteres.
+- **Metadados**: Inclui posição de caracteres (start/end) e informações do arquivo.
+- **Híbrido**: Suporte nativo para ESM e CommonJS.
 
 ## Instalação
 
 ```bash
-npm install fila-impressao
+npm install treechunk
 ```
 
-## Uso Básico
+## Uso Rápido
+
+O modo mais simples de usar a TreeChunk é através da função `generateChunks`:
 
 ```typescript
-import { readDirRecursiveFiltered, buildDocuments, buildChunks } from 'fila-impressao';
+import { generateChunks } from 'treechunk';
 
 async function run() {
-  const rootDir = './src';
-
-  // 1. Listar arquivos filtrados
-  const files = await readDirRecursiveFiltered(rootDir, ['.ts', '.tsx']);
-
-  // 2. Construir documentos com metadados e conteúdo
-  const documents = await buildDocuments(rootDir, files);
-
-  // 3. Extrair chunks de código (máximo 2000 caracteres por chunk)
-  const chunks = await buildChunks(documents, 2000);
+  const chunks = await generateChunks({
+    rootDir: './src',
+    ignoreDirs: ['node_modules', 'dist'], // Opcional
+    maxChunkSize: 2000 // Opcional, padrão é 2000
+  });
 
   console.log(chunks);
 }
@@ -39,19 +36,39 @@ async function run() {
 run();
 ```
 
-## API
+## API Principal
 
-### `readDirRecursiveFiltered(dir, extensions, ignoreDirs?)`
-Lista todos os arquivos em um diretório recursivamente, filtrando por extensões e ignorando pastas específicas.
+### `generateChunks(options)`
+Função orquestradora que realiza todo o fluxo de varredura, leitura e extração.
 
-### `buildDocuments(rootDir, files)`
-Lê o conteúdo dos arquivos e gera objetos `FileDocument` com metadados.
+**Opções (`GenerateChunksOptions`):**
+- `rootDir`: (Obrigatório) Caminho raiz para a varredura.
+- `extensions`: (Opcional) Array de extensões (ex: `['.ts', '.js']`).
+- `ignoreDirs`: (Opcional) Pastas a serem ignoradas.
+- `maxChunkSize`: (Opcional) Limite máximo de caracteres por chunk.
 
-### `extractChunksFromFile(filePath, maxChunkSize?)`
-Analisa um único arquivo e extrai elementos de código como chunks.
+## API de Baixo Nível
 
-### `buildChunks(documents, maxChunkSize?)`
-Processa uma lista de documentos e retorna todos os chunks encontrados.
+Se precisar de mais controle, você pode usar as funções internas:
+
+- `readDirRecursiveFiltered`: Lista arquivos recursivamente.
+- `buildDocuments`: Transforma arquivos em documentos com metadados.
+- `extractChunksFromFile`: Extrai chunks de um arquivo específico.
+- `buildChunks`: Processa uma lista de documentos para gerar chunks.
+
+## Tipos
+
+```typescript
+type CodeChunk = {
+  fileName: string;
+  elementName: string;
+  elementType: string;
+  charCount: number;
+  charStart: number;
+  charEnd: number;
+  content: string;
+};
+```
 
 ## Licença
 

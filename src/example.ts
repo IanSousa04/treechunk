@@ -1,28 +1,23 @@
-import {
-  buildDocuments,
-  readDirRecursiveFiltered,
-  buildChunks
-} from './index';
+import { generateChunks } from './index';
 
 const main = async () => {
-  // Use current directory for example
-  const rootDir = process.cwd();
+  console.log('Starting chunk generation with simplified API...');
 
-  const files = await readDirRecursiveFiltered(rootDir, ['.ts', '.js', '.tsx']);
+  const chunks = await generateChunks({
+    rootDir: process.cwd(),
+    ignoreDirs: ['node_modules', 'dist', '.git'],
+    maxChunkSize: 1000
+  });
 
-  const documents = await buildDocuments(rootDir, files);
+  console.log('Total chunks generated:', chunks.length);
 
-  console.log('Total arquivos:', documents.length);
-
-  const chunks = await buildChunks(documents);
-
-  for (const chunk of chunks) {
-    if (chunk.charCount > 2000) {
-      console.log('Large chunk found:', chunk.elementName, chunk.charCount);
-    }
+  if (chunks.length > 0) {
+    console.log('Example chunk:', {
+      file: chunks[0].fileName,
+      element: chunks[0].elementName,
+      size: chunks[0].charCount
+    });
   }
-
-  console.log('Processo encerrado. Total de chunks:', chunks.length);
 };
 
 main().catch(console.error);

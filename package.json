@@ -1,5 +1,5 @@
 {
-  "name": "fila-impressao",
+  "name": "treechunk",
   "version": "1.0.0",
   "description": "Biblioteca para análise de código e criação de chunks estruturados.",
   "main": "./dist/index.js",
