@@ -1,26 +1,51 @@
-# TreeChunk
+# 🌳 TreeChunk
 
-# ⚠️ EM DESENVOLVIMENTO
+<p align="center">
+  <img src="public/logo.jpg" alt="TreeChunk Logo" width="200" />
+</p>
 
-Uma biblioteca TypeScript estruturada para análise de código e extração de chunks (pedaços) de arquivos fonte. Esta ferramenta utiliza o compilador TypeScript para navegar na Árvore de Sintaxe Abstrata (AST) e identificar funções, classes, interfaces e outros elementos.
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow" alt="Status: Em Desenvolvimento" />
+  <img src="https://img.shields.io/badge/Open%20Source-%E2%9D%A4-brightgreen" alt="Open Source" />
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" />
+</p>
 
-## Funcionalidades
+---
 
-- **Simplificado**: Gere chunks com apenas uma chamada de função.
-- **AST-based**: Utiliza o parser do TypeScript para identificação precisa de elementos de código.
-- **Auto-splitting**: Divide elementos grandes em múltiplos chunks respeitando limites de caracteres.
-- **Metadados**: Inclui posição de caracteres (start/end) e informações do arquivo.
-- **Híbrido**: Suporte nativo para ESM e CommonJS.
+## 🚀 O que é a TreeChunk?
 
-## Instalação
+**TreeChunk** é uma biblioteca open source em TypeScript projetada para resolver um dos desafios fundamentais em LLMs (Large Language Models) e RAG (Retrieval-Augmented Generation): a **fragmentação inteligente de código-fonte**.
+
+Diferente de divisores de texto genéricos que cortam arquivos aleatoriamente, a TreeChunk utiliza análise sintática para garantir que cada "chunk" (pedaço) de código mantenha seu contexto semântico, respeitando limites lógicos como funções, classes e interfaces.
+
+> [!WARNING]
+> **Aviso de Fase Inicial:** O projeto está em fase ativa de desenvolvimento. APIs podem mudar e novos recursos são adicionados semanalmente.
+
+## 🛠️ Suporte Atual e Visão
+
+Atualmente, a biblioteca foca em ecossistemas **JavaScript e TypeScript**, utilizando o compilador oficial do TypeScript para navegar na Árvore de Sintaxe Abstrata (AST).
+
+**Nossa Visão:**
+- **Independência de Linguagem:** Evoluir para suportar qualquer linguagem de programação (Python, Go, Rust, Java, etc.) mantendo a precisão semântica.
+- **Multiformato:** Implementar chunking estruturado para arquivos de dados e marcação como **PDF, XML, HTML, Markdown** e outros.
+
+## ✨ Funcionalidades
+
+- 🧠 **AST-Based**: Identificação precisa de elementos de código através da Árvore de Sintaxe Abstrata.
+- 📏 **Auto-splitting Inteligente**: Divide elementos excessivamente grandes em múltiplos chunks, garantindo que o corte ocorra em pontos lógicos sempre que possível.
+- 📊 **Metadados Completos**: Cada chunk inclui nome do elemento, tipo (função, classe, etc.), contagem de caracteres e posições exatas (start/end).
+- 📦 **Dual Build**: Suporte nativo para **ESM** e **CommonJS**.
+- ⚡ **API Simplificada**: Gere chunks de um projeto inteiro com apenas uma função.
+
+## 📦 Instalação
 
 ```bash
 npm install treechunk
 ```
 
-## Uso Rápido
+## 💻 Uso Rápido
 
-O modo mais simples de usar a TreeChunk é através da função `generateChunks`:
+A forma mais eficiente de utilizar a TreeChunk é através da função orquestradora `generateChunks`:
 
 ```typescript
 import { generateChunks } from 'treechunk';
@@ -28,50 +53,40 @@ import { generateChunks } from 'treechunk';
 async function run() {
   const chunks = await generateChunks({
     rootDir: './src',
-    ignoreDirs: ['node_modules', 'dist'], // Opcional
-    maxChunkSize: 2000 // Opcional, padrão é 2000
+    ignoreDirs: ['node_modules', 'dist', '.git'],
+    maxChunkSize: 2000 // Tamanho máximo de caracteres por chunk
   });
 
-  console.log(chunks);
+  console.log(`Gerados ${chunks.length} chunks.`);
+  console.log(chunks[0]);
 }
 
 run();
 ```
 
-## API Principal
+## 🗺️ Roadmap
 
-### `generateChunks(options)`
-Função orquestradora que realiza todo o fluxo de varredura, leitura e extração.
+- [x] Suporte inicial para TS/JS (Functions, Classes, Interfaces, Enums).
+- [ ] Suporte para variáveis globais e objetos complexos.
+- [ ] Implementação de parsers para outras linguagens (Python via Tree-Sitter).
+- [ ] Suporte para documentos (PDF, XML, HTML).
+- [ ] Sistema de plugins para extração customizada.
 
-**Opções (`GenerateChunksOptions`):**
-- `rootDir`: (Obrigatório) Caminho raiz para a varredura.
-- `extensions`: (Opcional) Array de extensões (ex: `['.ts', '.js']`).
-- `ignoreDirs`: (Opcional) Pastas a serem ignoradas.
-- `maxChunkSize`: (Opcional) Limite máximo de caracteres por chunk.
+## 🤝 Contribuindo
 
-## API de Baixo Nível
+Este é um projeto **Open Source** e adoraríamos sua ajuda! Seja reportando bugs, sugerindo funcionalidades ou enviando Pull Requests.
 
-Se precisar de mais controle, você pode usar as funções internas:
+1. Faça um Fork do projeto.
+2. Crie uma Branch para sua feature (`git checkout -b feature/nova-funcionalidade`).
+3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`).
+4. Push para a Branch (`git push origin feature/nova-funcionalidade`).
+5. Abra um Pull Request.
 
-- `readDirRecursiveFiltered`: Lista arquivos recursivamente.
-- `buildDocuments`: Transforma arquivos em documentos com metadados.
-- `extractChunksFromFile`: Extrai chunks de um arquivo específico.
-- `buildChunks`: Processa uma lista de documentos para gerar chunks.
+## 📄 Licença
 
-## Tipos
+Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
 
-```typescript
-type CodeChunk = {
-  fileName: string;
-  elementName: string;
-  elementType: string;
-  charCount: number;
-  charStart: number;
-  charEnd: number;
-  content: string;
-};
-```
-
-## Licença
-
-MIT
+---
+<p align="center">
+Desenvolvido com ❤️ para a comunidade open source.
+</p>
