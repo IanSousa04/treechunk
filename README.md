@@ -85,8 +85,3 @@ Este é um projeto **Open Source** e adoraríamos sua ajuda! Seja reportando bug
 ## 📄 Licença
 
 Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
-
----
-<p align="center">
-Desenvolvido com ❤️ para a comunidade open source.
-</p>
