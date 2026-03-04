@@ -1,5 +1,7 @@
 # TreeChunk
 
+# ⚠️ EM DESENVOLVIMENTO
+
 Uma biblioteca TypeScript estruturada para análise de código e extração de chunks (pedaços) de arquivos fonte. Esta ferramenta utiliza o compilador TypeScript para navegar na Árvore de Sintaxe Abstrata (AST) e identificar funções, classes, interfaces e outros elementos.
 
 ## Funcionalidades
