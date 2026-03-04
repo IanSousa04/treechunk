@@ -72,4 +72,4 @@ type CodeChunk = {
 
 ## Licença
 
-ISC
+MIT
